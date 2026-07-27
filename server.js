@@ -1,43 +1,50 @@
 const express = require("express");
 const cors = require("cors");
-const { GameDig } = require("gamedig");
 
 const app = express();
 
 app.use(cors());
 
 app.get("/", (req, res) => {
-    res.send("API FIKSIKI en ligne !");
+  res.send("API FIKSIKI en ligne !");
 });
 
 app.get("/server", async (req, res) => {
-    try {
-        const state = await GameDig.query({
-            type: "dayz",
-            host: "149.202.82.212",
-            port: 4712
-        });
+  try {
+    const gamedigModule = await import("gamedig");
+    const GameDig = gamedigModule.GameDig;
 
-        res.json({
-            online: true,
-            name: state.name,
-            map: state.map,
-            players: state.players.length,
-            maxPlayers: state.maxplayers,
-            ping: state.ping,
-            version: state.raw.version
-        });
+    const state = await GameDig.query({
+      type: "dayz",
+      host: "149.202.82.212",
+      port: 4712,
+      givenPortOnly: true,
+      socketTimeout: 5000,
+      attemptTimeout: 15000
+    });
 
-    } catch (err) {
-        res.json({
-            online: false,
-            erreur: err.message
-        });
-    }
+    res.json({
+      online: true,
+      name: state.name || "FIKSIKI",
+      map: state.map || "chernarusplus",
+      players: state.numplayers ?? state.players?.length ?? 0,
+      maxPlayers: state.maxplayers ?? 64,
+      ping: state.ping ?? null,
+      version: state.version || state.raw?.version || null,
+      queryPort: state.queryPort ?? 4712
+    });
+  } catch (err) {
+    console.error("Erreur GameDig :", err);
+
+    res.json({
+      online: false,
+      erreur: err.message
+    });
+  }
 });
 
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
-    console.log(`API démarrée sur le port ${PORT}`);
+  console.log(`API démarrée sur le port ${PORT}`);
 });
