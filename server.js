@@ -30,7 +30,8 @@ app.get("/server", async (req, res) => {
 
     } catch (err) {
         res.json({
-            online: false
+            online: false,
+            erreur: err.message
         });
     }
 });
