@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const Gamedig = require("gamedig");
+const { GameDig } = require("gamedig");
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.get("/", (req, res) => {
 
 app.get("/server", async (req, res) => {
     try {
-        const state = await Gamedig.query({
+        const state = await GameDig.query({
             type: "dayz",
             host: "149.202.82.212",
             port: 4712
